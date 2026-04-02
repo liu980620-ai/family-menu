@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>家庭餐厅 - 家庭点菜APP</title>
-    <link href="https://fonts.googleapis.com/css2?family=PingFang+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
+
     <style>
         * {
             margin: 0;
@@ -13,7 +13,7 @@
         }
 
         body {
-            font-family: 'PingFang SC', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
             color: #333;
             line-height: 1.5;
             background-color: #f5f5f5;
@@ -1179,8 +1179,136 @@
                 alert('请先选择菜品');
                 return;
             }
-            alert('订单已提交，感谢您的购买！');
+            
+            // 准备订单详情
+            let orderDetails = '家庭点菜订单\n\n';
+            orderDetails += '订单时间: ' + new Date().toLocaleString() + '\n\n';
+            orderDetails += '已点菜品:\n';
+            
+            cartItems.forEach((item, index) => {
+                orderDetails += (index + 1) + '. ' + item.name + '\n';
+            });
+            
+            orderDetails += '\n总计: ' + cartItems.length + ' 道菜\n';
+            
+            // 发送微信通知
+            sendWechatNotification(orderDetails);
         });
+        
+        // 发送微信通知
+        function sendWechatNotification(orderDetails) {
+            // 准备通知内容
+            const notificationTitle = '家庭点菜订单';
+            const notificationBody = orderDetails;
+            
+            console.log('准备发送微信通知');
+            console.log('通知标题:', notificationTitle);
+            console.log('通知内容:', notificationBody);
+            
+            // Server酱 SendKey
+            const sendKey = 'SCT332981TEvlDptFHcHg27lTwf25vCMk5';
+            
+            // 发送真实的微信通知
+            if (sendKey && sendKey !== 'YOUR_SEND_KEY') {
+                // 构建 API URL
+                const apiUrl = `https://sctapi.ftqq.com/${sendKey}.send`;
+                
+                // 准备请求参数
+                const params = new URLSearchParams();
+                params.append('title', notificationTitle);
+                params.append('desp', notificationBody);
+                
+                // 发送请求
+                fetch(apiUrl, {
+                    method: 'POST',
+                    body: params
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Server酱 微信通知发送结果:', data);
+                    if (data.code === 0) {
+                        console.log('微信通知发送成功');
+                    } else {
+                        console.log('微信通知发送失败:', data.message);
+                    }
+                })
+                .catch(error => {
+                    console.log('微信通知发送出错:', error);
+                });
+            } else {
+                console.log('未配置 Server酱 SendKey，跳过真实微信通知');
+            }
+            
+            // 创建微信通知样式的弹窗
+            const wechatNotification = document.createElement('div');
+            wechatNotification.style.position = 'fixed';
+            wechatNotification.style.top = '20px';
+            wechatNotification.style.right = '20px';
+            wechatNotification.style.width = '320px';
+            wechatNotification.style.background = 'white';
+            wechatNotification.style.borderRadius = '8px';
+            wechatNotification.style.boxShadow = '0 2px 10px rgba(0,0,0,0.2)';
+            wechatNotification.style.padding = '15px';
+            wechatNotification.style.zIndex = '9999';
+            wechatNotification.style.animation = 'slideIn 0.3s ease-out';
+            
+            // 添加微信图标和样式
+            wechatNotification.innerHTML = `
+                <div style="display: flex; align-items: center; margin-bottom: 10px;">
+                    <div style="width: 40px; height: 40px; background: #07C160; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 10px;">
+                        <span style="color: white; font-size: 20px;">💬</span>
+                    </div>
+                    <div>
+                        <div style="font-weight: 600; font-size: 14px;">微信通知</div>
+                        <div style="font-size: 12px; color: #999; margin-top: 2px;">刚刚</div>
+                    </div>
+                </div>
+                <div style="font-size: 14px; line-height: 1.4; margin-bottom: 10px;">
+                    <div style="font-weight: 500; margin-bottom: 5px;">${notificationTitle}</div>
+                    <div style="color: #666; white-space: pre-wrap;">${notificationBody}</div>
+                </div>
+                <div style="display: flex; justify-content: flex-end; margin-top: 10px;">
+                    <button id="wechat-notification-close" style="padding: 6px 12px; background: #f0f0f0; border: none; border-radius: 4px; font-size: 12px; cursor: pointer;">关闭</button>
+                </div>
+            `;
+            
+            // 添加动画样式
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes slideIn {
+                    from { transform: translateX(100%); opacity: 0; }
+                    to { transform: translateX(0); opacity: 1; }
+                }
+            `;
+            document.head.appendChild(style);
+            
+            // 添加到页面
+            document.body.appendChild(wechatNotification);
+            
+            // 添加关闭按钮事件
+            document.getElementById('wechat-notification-close').addEventListener('click', () => {
+                wechatNotification.remove();
+                style.remove();
+            });
+            
+            // 自动关闭
+            setTimeout(() => {
+                if (wechatNotification.parentNode) {
+                    wechatNotification.style.animation = 'slideIn 0.3s ease-out reverse';
+                    setTimeout(() => {
+                        wechatNotification.remove();
+                        style.remove();
+                    }, 300);
+                }
+            }, 5000);
+            
+            // 清空购物车
+            cartItems = [];
+            cartCount = 0;
+            cartCountElement.textContent = cartCount;
+            updateCartDetail();
+            cartDetail.classList.remove('show');
+        }
     </script>
 </body>
 </html>
