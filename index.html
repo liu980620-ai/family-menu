@@ -1,0 +1,1186 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>家庭餐厅 - 家庭点菜APP</title>
+    <link href="https://fonts.googleapis.com/css2?family=PingFang+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'PingFang SC', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            color: #333;
+            line-height: 1.5;
+            background-color: #f5f5f5;
+        }
+
+        /* 顶部导航栏 */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 50px;
+            background-color: #ff6700;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 15px;
+            z-index: 1000;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .restaurant-name {
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        /* 分类导航 */
+        .category-nav {
+            position: fixed;
+            top: 50px;
+            left: 0;
+            width: 80px;
+            bottom: 60px;
+            background-color: white;
+            display: flex;
+            flex-direction: column;
+            z-index: 999;
+            box-shadow: 2px 0 2px rgba(0, 0, 0, 0.05);
+        }
+
+        .category-item {
+            padding: 15px 0;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            color: #666;
+            position: relative;
+        }
+
+        .category-item.active {
+            color: #ff6700;
+            font-weight: 600;
+            background-color: #fff9f5;
+        }
+
+        .category-item.active::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 15px;
+            bottom: 15px;
+            width: 3px;
+            background-color: #ff6700;
+        }
+
+        /* 菜品列表 */
+        .menu-content {
+            margin-top: 50px;
+            margin-left: 80px;
+            padding-bottom: 70px;
+        }
+
+        .menu-section {
+            margin-bottom: 20px;
+        }
+
+        .section-title {
+            padding: 10px 15px;
+            font-size: 14px;
+            color: #999;
+            background-color: #f5f5f5;
+        }
+
+        .dish-list {
+            background-color: white;
+        }
+
+        .dish-item {
+            display: flex;
+            padding: 15px;
+            border-bottom: 1px solid #f0f0f0;
+            transition: background-color 0.2s ease;
+        }
+
+        .dish-item:hover {
+            background-color: #fafafa;
+        }
+
+        .dish-image {
+            width: 80px;
+            height: 80px;
+            border-radius: 8px;
+            margin-right: 15px;
+            object-fit: cover;
+        }
+
+        .dish-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .dish-name {
+            font-size: 16px;
+            font-weight: 500;
+            margin-bottom: 5px;
+        }
+
+        .dish-icon {
+            margin-left: 8px;
+            font-size: 16px;
+            vertical-align: middle;
+        }
+
+        .dish-desc {
+            font-size: 12px;
+            color: #999;
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+
+        .dish-price-add {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .add-btn {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background-color: #ff6700;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            font-weight: bold;
+            line-height: 1;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .add-btn:hover {
+            transform: scale(1.1);
+        }
+
+        /* 购物车 */
+        .cart {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background-color: white;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 15px;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+            z-index: 999;
+        }
+
+        .cart-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+        }
+
+        .cart-icon {
+            position: relative;
+        }
+
+        .cart-icon i {
+            font-size: 24px;
+            color: #ff6700;
+        }
+
+        .cart-count {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background-color: #ff4757;
+            color: white;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .cart-text {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .checkout-btn {
+            background-color: #ff6700;
+            color: white;
+            padding: 8px 25px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .checkout-btn:hover {
+            background-color: #e65a00;
+        }
+
+        /* 购物车详情 */
+        .cart-detail {
+            position: fixed;
+            bottom: 60px;
+            left: 80px;
+            right: 0;
+            background-color: white;
+            border-top-left-radius: 20px;
+            border-top-right-radius: 20px;
+            box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.1);
+            z-index: 998;
+            max-height: 400px;
+            overflow-y: auto;
+            transform: translateY(100%);
+            transition: transform 0.3s ease;
+        }
+
+        .cart-detail.show {
+            transform: translateY(0);
+        }
+
+        .cart-detail-header {
+            padding: 15px;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .cart-detail-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .cart-detail-close {
+            font-size: 20px;
+            color: #999;
+            cursor: pointer;
+        }
+
+        .cart-detail-list {
+            padding: 10px 15px;
+        }
+
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .cart-item-name {
+            font-size: 14px;
+            color: #333;
+        }
+
+        .delete-btn {
+            font-size: 20px;
+            color: #999;
+            cursor: pointer;
+            padding: 0 10px;
+            border-radius: 50%;
+            transition: all 0.2s ease;
+        }
+
+        .delete-btn:hover {
+            color: #ff4757;
+            background-color: #f5f5f5;
+        }
+
+        .cart-detail-footer {
+            padding: 15px;
+            border-top: 1px solid #f0f0f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .cart-detail-total {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .cart-detail-total-price {
+            font-size: 16px;
+            font-weight: 600;
+            color: #ff4757;
+        }
+
+        /* 响应式设计 */
+        @media (min-width: 768px) {
+            body {
+                max-width: 800px;
+                margin: 0 auto;
+                box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+                position: relative;
+            }
+
+            .header, .cart {
+                max-width: 800px;
+                left: 50%;
+                transform: translateX(-50%);
+            }
+
+            .category-nav {
+                left: 0;
+                transform: none;
+                width: 100px;
+            }
+
+            .menu-content {
+                margin-left: 100px;
+            }
+        }
+
+        /* 动画效果 */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .dish-item {
+            animation: fadeIn 0.3s ease-out;
+        }
+    </style>
+</head>
+<body>
+    <!-- 顶部导航栏 -->
+    <header class="header">
+        <div class="restaurant-name">家庭餐厅</div>
+    </header>
+
+    <!-- 分类导航 -->
+    <div class="category-nav">
+        <div class="category-item active">热菜</div>
+        <div class="category-item">凉菜</div>
+        <div class="category-item">汤品</div>
+        <div class="category-item">饮品</div>
+    </div>
+
+    <!-- 菜品列表 -->
+    <div class="menu-content">
+        <!-- 热菜 -->
+        <div class="menu-section" id="hot-dishes">
+            <div class="section-title">热菜</div>
+            <div class="dish-list">
+                <div class="dish-item">
+                    <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=delicious%20chinese%20braised%20pork%20belly%20red%20cooked%20in%20soy%20sauce%20glazed%20pork&image_size=square" alt="红烧肉" class="dish-image">
+                    <div class="dish-info">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div class="dish-name">红烧肉 <span class="dish-icon">🍖</span></div>
+                            <div class="add-btn">+</div>
+                        </div>
+                        <div class="dish-desc">传统红烧肉，肥而不腻，入口即化</div>
+                    </div>
+                </div>
+                <div class="dish-item">
+                    <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=delicious%20chinese%20kung%20pao%20chicken%20with%20peanuts%20dried%20red%20peppers%20and%20green%20peppers&image_size=square" alt="宫保鸡丁" class="dish-image">
+                    <div class="dish-info">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div class="dish-name">宫保鸡丁 <span class="dish-icon">🍗</span></div>
+                            <div class="add-btn">+</div>
+                        </div>
+                        <div class="dish-desc">经典川菜，鸡肉嫩滑，花生香脆</div>
+                    </div>
+                </div>
+                <div class="dish-item">
+                    <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=delicious%20chinese%20steamed%20sea%20bass%20fish%20with%20ginger%20and%20scallions&image_size=square" alt="清蒸鲈鱼" class="dish-image">
+                    <div class="dish-info">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div class="dish-name">清蒸鲈鱼 <span class="dish-icon">🐟</span></div>
+                            <div class="add-btn">+</div>
+                        </div>
+                        <div class="dish-desc">新鲜鲈鱼，清蒸做法，保持原汁原味</div>
+                    </div>
+                </div>
+                <div class="dish-item">
+                    <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=delicious%20chinese%20mapo%20tofu%20spicy%20sichuan%20tofu%20with%20minced%20meat&image_size=square" alt="麻婆豆腐" class="dish-image">
+                    <div class="dish-info">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div class="dish-name">麻婆豆腐 <span class="dish-icon">🍲</span></div>
+                            <div class="add-btn">+</div>
+                        </div>
+                        <div class="dish-desc">四川特色，麻辣鲜香，豆腐嫩滑</div>
+                    </div>
+                </div>
+                <div class="dish-item">
+                    <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=delicious%20chinese%20spicy%20sour%20shredded%20potatoes%20stir%20fry&image_size=square" alt="酸辣土豆丝" class="dish-image">
+                    <div class="dish-info">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div class="dish-name">酸辣土豆丝 <span class="dish-icon">🥔</span></div>
+                            <div class="add-btn">+</div>
+                        </div>
+                        <div class="dish-desc">酸辣可口，爽脆开胃</div>
+                    </div>
+                </div>
+                <div class="dish-item">
+                    <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=delicious%20chinese%20tomato%20and%20scrambled%20eggs%20stir%20fry&image_size=square" alt="番茄炒蛋" class="dish-image">
+                    <div class="dish-info">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div class="dish-name">番茄炒蛋 <span class="dish-icon">🍅</span></div>
+                            <div class="add-btn">+</div>
+                        </div>
+                        <div class="dish-desc">酸甜可口，经典家常菜</div>
+                    </div>
+                </div>
+                <div class="dish-item">
+                    <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=delicious%20chinese%20green%20pepper%20and%20scrambled%20eggs%20stir%20fry&image_size=square" alt="青椒炒鸡蛋" class="dish-image">
+                    <div class="dish-info">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div class="dish-name">青椒炒鸡蛋 <span class="dish-icon">🫑</span></div>
+                            <div class="add-btn">+</div>
+                        </div>
+                        <div class="dish-desc">清香扑鼻，营养丰富</div>
+                    </div>
+                </div>
+                <div class="dish-item">
+                    <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=delicious%20chinese%20garlic%20broccoli%20stir%20fry&image_size=square" alt="蒜蓉西兰花" class="dish-image">
+                    <div class="dish-info">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div class="dish-name">蒜蓉西兰花 <span class="dish-icon">🥦</span></div>
+                            <div class="add-btn">+</div>
+                        </div>
+                        <div class="dish-desc">清淡爽口，健康营养</div>
+                    </div>
+                </div>
+                <div class="dish-item">
+                    <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=delicious%20chinese%20di%20san%20xian%20three%20fresh%20vegetables%20potato%20eggplant%20pepper&image_size=square" alt="地三鲜" class="dish-image">
+                    <div class="dish-info">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div class="dish-name">地三鲜 <span class="dish-icon">🥔</span></div>
+                            <div class="add-btn">+</div>
+                        </div>
+                        <div class="dish-desc">土豆、茄子、青椒的完美搭配</div>
+                    </div>
+                </div>
+                <div class="dish-item">
+                    <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=delicious%20chinese%20mushroom%20and%20green%20vegetables%20stir%20fry&image_size=square" alt="香菇青菜" class="dish-image">
+                    <div class="dish-info">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div class="dish-name">香菇青菜 <span class="dish-icon">🍄</span></div>
+                            <div class="add-btn">+</div>
+                        </div>
+                        <div class="dish-desc">香菇鲜香，青菜嫩脆</div>
+                    </div>
+                </div>
+                <div class="dish-item">
+                    <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=delicious%20chinese%20yu%20xiang%20rou%20si%20fish%20fragrant%20shredded%20pork&image_size=square" alt="鱼香肉丝" class="dish-image">
+                    <div class="dish-info">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div class="dish-name">鱼香肉丝 <span class="dish-icon">🐟</span></div>
+                            <div class="add-btn">+</div>
+                        </div>
+                        <div class="dish-desc">酸甜可口，经典川菜</div>
+                    </div>
+                </div>
+                <div class="dish-item">
+                    <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=delicious%20chinese%20green%20pepper%20and%20shredded%20pork%20stir%20fry&image_size=square" alt="青椒肉丝" class="dish-image">
+                    <div class="dish-info">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div class="dish-name">青椒肉丝 <span class="dish-icon">🫑</span></div>
+                            <div class="add-btn">+</div>
+                        </div>
+                        <div class="dish-desc">青椒爽脆，肉丝嫩滑</div>
+                    </div>
+                </div>
+                <div class="dish-item">
+                    <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=delicious%20chinese%20cola%20chicken%20wings%20glazed%20in%20cola%20sauce&image_size=square" alt="可乐鸡翅" class="dish-image">
+                    <div class="dish-info">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div class="dish-name">可乐鸡翅 <span class="dish-icon">🍗</span></div>
+                            <div class="add-btn">+</div>
+                        </div>
+                        <div class="dish-desc">甜香可口，肉质鲜嫩</div>
+                    </div>
+                </div>
+                <div class="dish-item">
+                    <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=delicious%20chinese%20stir%20fried%20yellow%20beef%20with%20green%20peppers&image_size=square" alt="小炒黄牛肉" class="dish-image">
+                    <div class="dish-info">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div class="dish-name">小炒黄牛肉 <span class="dish-icon">🐂</span></div>
+                            <div class="add-btn">+</div>
+                        </div>
+                        <div class="dish-desc">香辣可口，牛肉鲜嫩</div>
+                    </div>
+                </div>
+                <div class="dish-item">
+                    <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=delicious%20chinese%20garlic%20shoots%20and%20pork%20stir%20fry&image_size=square" alt="蒜薹炒肉" class="dish-image">
+                    <div class="dish-info">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div class="dish-name">蒜薹炒肉 <span class="dish-icon">🧄</span></div>
+                            <div class="add-btn">+</div>
+                        </div>
+                        <div class="dish-desc">蒜香扑鼻，肉质鲜美</div>
+                    </div>
+                </div>
+                <div class="dish-item">
+                    <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=delicious%20chinese%20sour%20fish%20with%20pickled%20vegetables&image_size=square" alt="酸菜鱼" class="dish-image">
+                    <div class="dish-info">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div class="dish-name">酸菜鱼 <span class="dish-icon">🐟</span></div>
+                            <div class="add-btn">+</div>
+                        </div>
+                        <div class="dish-desc">酸辣可口，鱼肉鲜嫩</div>
+                    </div>
+                </div>
+                <div class="dish-item">
+                    <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=delicious%20chinese%20braised%20fish%20in%20soy%20sauce&image_size=square" alt="红烧鱼" class="dish-image">
+                    <div class="dish-info">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div class="dish-name">红烧鱼 <span class="dish-icon">🐟</span></div>
+                            <div class="add-btn">+</div>
+                        </div>
+                        <div class="dish-desc">酱香浓郁，鱼肉鲜美</div>
+                    </div>
+                </div>
+                <div class="dish-item">
+                    <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=delicious%20chinese%20sweet%20and%20sour%20pork%20tenderloin&image_size=square" alt="糖醋里脊" class="dish-image">
+                    <div class="dish-info">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div class="dish-name">糖醋里脊 <span class="dish-icon">🐷</span></div>
+                            <div class="add-btn">+</div>
+                        </div>
+                        <div class="dish-desc">酸甜可口，外酥里嫩</div>
+                    </div>
+                </div>
+                <div class="dish-item">
+                    <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=delicious%20chinese%20guo%20bao%20rou%20crispy%20sweet%20and%20sour%20pork%20northeastern%20chinese%20dish&image_size=square" alt="锅包肉" class="dish-image">
+                    <div class="dish-info">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div class="dish-name">锅包肉 <span class="dish-icon">🐷</span></div>
+                            <div class="add-btn">+</div>
+                        </div>
+                        <div class="dish-desc">外酥里嫩，酸甜可口</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 凉菜 -->
+        <div class="menu-section" id="cold-dishes" style="display: none;">
+            <div class="section-title">凉菜</div>
+            <div class="dish-list">
+                <div class="dish-item">
+                    <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=delicious%20chinese%20patted%20cucumber%20cold%20dish&image_size=square" alt="拍黄瓜" class="dish-image">
+                    <div class="dish-info">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div class="dish-name">拍黄瓜 <span class="dish-icon">🥒</span></div>
+                            <div class="add-btn">+</div>
+                        </div>
+                        <div class="dish-desc">清爽可口，酸辣开胃</div>
+                    </div>
+                </div>
+                <div class="dish-item">
+                    <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=delicious%20chinese%20braised%20pork%20ears%20cold%20dish&image_size=square" alt="卤猪耳" class="dish-image">
+                    <div class="dish-info">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div class="dish-name">卤猪耳 <span class="dish-icon">🐷</span></div>
+                            <div class="add-btn">+</div>
+                        </div>
+                        <div class="dish-desc">传统卤味，口感脆爽</div>
+                    </div>
+                </div>
+                <div class="dish-item">
+                    <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=delicious%20chinese%20cold%20tofu%20salad&image_size=square" alt="凉拌豆腐" class="dish-image">
+                    <div class="dish-info">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div class="dish-name">凉拌豆腐 <span class="dish-icon">🥛</span></div>
+                            <div class="add-btn">+</div>
+                        </div>
+                        <div class="dish-desc">嫩豆腐配以调料，清淡爽口</div>
+                    </div>
+                </div>
+                <div class="dish-item">
+                    <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=delicious%20chinese%20mouthwatering%20chicken%20cold%20dish&image_size=square" alt="口水鸡" class="dish-image">
+                    <div class="dish-info">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div class="dish-name">口水鸡 <span class="dish-icon">🍗</span></div>
+                            <div class="add-btn">+</div>
+                        </div>
+                        <div class="dish-desc">麻辣鲜香，口感嫩滑</div>
+                    </div>
+                </div>
+                <div class="dish-item">
+                    <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=delicious%20chinese%20white%20cut%20chicken%20cold%20dish&image_size=square" alt="白切鸡" class="dish-image">
+                    <div class="dish-info">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div class="dish-name">白切鸡 <span class="dish-icon">🍗</span></div>
+                            <div class="add-btn">+</div>
+                        </div>
+                        <div class="dish-desc">原汁原味，肉质鲜嫩</div>
+                    </div>
+                </div>
+                <div class="dish-item">
+                    <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=delicious%20chinese%20braised%20beef%20cold%20dish&image_size=square" alt="酱牛肉" class="dish-image">
+                    <div class="dish-info">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div class="dish-name">酱牛肉 <span class="dish-icon">🐂</span></div>
+                            <div class="add-btn">+</div>
+                        </div>
+                        <div class="dish-desc">酱香浓郁，肉质紧实</div>
+                    </div>
+                </div>
+                <div class="dish-item">
+                    <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=delicious%20chinese%20cold%20tomato%20salad&image_size=square" alt="凉拌西红柿" class="dish-image">
+                    <div class="dish-info">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div class="dish-name">凉拌西红柿 <span class="dish-icon">🍅</span></div>
+                            <div class="add-btn">+</div>
+                        </div>
+                        <div class="dish-desc">酸甜可口，清爽解暑</div>
+                    </div>
+                </div>
+                <div class="dish-item">
+                    <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=delicious%20chinese%20pickled%20chicken%20feet%20cold%20dish&image_size=square" alt="泡椒凤爪" class="dish-image">
+                    <div class="dish-info">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div class="dish-name">泡椒凤爪 <span class="dish-icon">🐔</span></div>
+                            <div class="add-btn">+</div>
+                        </div>
+                        <div class="dish-desc">酸辣爽口，嚼劲十足</div>
+                    </div>
+                </div>
+                <div class="dish-item">
+                    <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=delicious%20chinese%20blanched%20shrimp%20cold%20dish&image_size=square" alt="白灼虾" class="dish-image">
+                    <div class="dish-info">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div class="dish-name">白灼虾 <span class="dish-icon">🦐</span></div>
+                            <div class="add-btn">+</div>
+                        </div>
+                        <div class="dish-desc">新鲜可口，原汁原味</div>
+                    </div>
+                </div>
+                <div class="dish-item">
+                    <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=delicious%20chinese%20cold%20lotus%20root%20salad&image_size=square" alt="凉拌藕片" class="dish-image">
+                    <div class="dish-info">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div class="dish-name">凉拌藕片 <span class="dish-icon">🥠</span></div>
+                            <div class="add-btn">+</div>
+                        </div>
+                        <div class="dish-desc">爽脆可口，酸甜开胃</div>
+                    </div>
+                </div>
+                <div class="dish-item">
+                    <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=delicious%20chinese%20cold%20tofu%20skin%20salad&image_size=square" alt="凉拌豆皮" class="dish-image">
+                    <div class="dish-info">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div class="dish-name">凉拌豆皮 <span class="dish-icon">🥛</span></div>
+                            <div class="add-btn">+</div>
+                        </div>
+                        <div class="dish-desc">口感细腻，清爽可口</div>
+                    </div>
+                </div>
+                <div class="dish-item">
+                    <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=delicious%20chinese%20century%20egg%20and%20tofu%20cold%20dish&image_size=square" alt="皮蛋豆腐" class="dish-image">
+                    <div class="dish-info">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div class="dish-name">皮蛋豆腐 <span class="dish-icon">🥚</span></div>
+                            <div class="add-btn">+</div>
+                        </div>
+                        <div class="dish-desc">嫩滑爽口，味道独特</div>
+                    </div>
+                </div>
+                <div class="dish-item">
+                    <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=delicious%20chinese%20salted%20peanuts%20cold%20dish&image_size=square" alt="盐水花生" class="dish-image">
+                    <div class="dish-info">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div class="dish-name">盐水花生 <span class="dish-icon">🥜</span></div>
+                            <div class="add-btn">+</div>
+                        </div>
+                        <div class="dish-desc">咸香可口，下酒必备</div>
+                    </div>
+                </div>
+                <div class="dish-item">
+                    <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=delicious%20chinese%20boiled%20edamame%20cold%20dish&image_size=square" alt="水煮毛豆" class="dish-image">
+                    <div class="dish-info">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div class="dish-name">水煮毛豆 <span class="dish-icon">🌱</span></div>
+                            <div class="add-btn">+</div>
+                        </div>
+                        <div class="dish-desc">清淡爽口，营养丰富</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 汤品 -->
+        <div class="menu-section" id="soup" style="display: none;">
+            <div class="section-title">汤品</div>
+            <div class="dish-list">
+                <div class="dish-item">
+                    <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=delicious%20chinese%20seaweed%20egg%20drop%20soup&image_size=square" alt="紫菜蛋花汤" class="dish-image">
+                    <div class="dish-info">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div class="dish-name">紫菜蛋花汤 <span class="dish-icon">🍲</span></div>
+                            <div class="add-btn">+</div>
+                        </div>
+                        <div class="dish-desc">紫菜与蛋花的完美结合，清淡爽口</div>
+                    </div>
+                </div>
+                <div class="dish-item">
+                    <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=delicious%20chinese%20tomato%20and%20egg%20soup&image_size=square" alt="番茄鸡蛋汤" class="dish-image">
+                    <div class="dish-info">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div class="dish-name">番茄鸡蛋汤 <span class="dish-icon">🍅</span></div>
+                            <div class="add-btn">+</div>
+                        </div>
+                        <div class="dish-desc">酸甜可口，开胃解腻</div>
+                    </div>
+                </div>
+                <div class="dish-item">
+                    <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=delicious%20chinese%20crucian%20carp%20soup&image_size=square" alt="鲫鱼汤" class="dish-image">
+                    <div class="dish-info">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div class="dish-name">鲫鱼汤 <span class="dish-icon">🐟</span></div>
+                            <div class="add-btn">+</div>
+                        </div>
+                        <div class="dish-desc">鲜香浓郁，营养丰富</div>
+                    </div>
+                </div>
+                <div class="dish-item">
+                    <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=delicious%20chinese%20winter%20melon%20and%20pork%20rib%20soup&image_size=square" alt="冬瓜排骨汤" class="dish-image">
+                    <div class="dish-info">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div class="dish-name">冬瓜排骨汤 <span class="dish-icon">🍖</span></div>
+                            <div class="add-btn">+</div>
+                        </div>
+                        <div class="dish-desc">清淡爽口，祛湿消肿</div>
+                    </div>
+                </div>
+                <div class="dish-item">
+                    <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=delicious%20chinese%20corn%20and%20pork%20rib%20soup&image_size=square" alt="玉米排骨汤" class="dish-image">
+                    <div class="dish-info">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div class="dish-name">玉米排骨汤 <span class="dish-icon">🌽</span></div>
+                            <div class="add-btn">+</div>
+                        </div>
+                        <div class="dish-desc">香甜可口，营养丰富</div>
+                    </div>
+                </div>
+                <div class="dish-item">
+                    <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=delicious%20chinese%20loofah%20and%20egg%20soup&image_size=square" alt="丝瓜蛋汤" class="dish-image">
+                    <div class="dish-info">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div class="dish-name">丝瓜蛋汤 <span class="dish-icon">🥒</span></div>
+                            <div class="add-btn">+</div>
+                        </div>
+                        <div class="dish-desc">清淡爽口，丝瓜鲜嫩</div>
+                    </div>
+                </div>
+                <div class="dish-item">
+                    <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=delicious%20chinese%20old%20hen%20soup%20nourishing&image_size=square" alt="老母鸡汤" class="dish-image">
+                    <div class="dish-info">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div class="dish-name">老母鸡汤 <span class="dish-icon">🍗</span></div>
+                            <div class="add-btn">+</div>
+                        </div>
+                        <div class="dish-desc">滋补养生，营养丰富</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 饮品 -->
+        <div class="menu-section" id="drinks" style="display: none;">
+            <div class="section-title">饮品</div>
+            <div class="dish-list">
+                <div class="dish-item">
+                    <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=delicious%20chinese%20green%20tea%20in%20cup&image_size=square" alt="绿茶" class="dish-image">
+                    <div class="dish-info">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div class="dish-name">绿茶 <span class="dish-icon">🍵</span></div>
+                            <div class="add-btn">+</div>
+                        </div>
+                        <div class="dish-desc">清香怡人，提神醒脑</div>
+                    </div>
+                </div>
+                <div class="dish-item">
+                    <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=delicious%20sprite%20soft%20drink%20in%20glass&image_size=square" alt="雪碧" class="dish-image">
+                    <div class="dish-info">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div class="dish-name">雪碧 <span class="dish-icon">🥤</span></div>
+                            <div class="add-btn">+</div>
+                        </div>
+                        <div class="dish-desc">清爽可口，柠檬味汽水</div>
+                    </div>
+                </div>
+                <div class="dish-item">
+                    <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=delicious%20coca%20cola%20soft%20drink%20in%20glass&image_size=square" alt="可乐" class="dish-image">
+                    <div class="dish-info">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div class="dish-name">可乐 <span class="dish-icon">🥤</span></div>
+                            <div class="add-btn">+</div>
+                        </div>
+                        <div class="dish-desc">经典碳酸饮料，口感醇厚</div>
+                    </div>
+                </div>
+                <div class="dish-item">
+                    <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=delicious%20jianlibao%20orange%20soft%20drink%20in%20can&image_size=square" alt="健力宝" class="dish-image">
+                    <div class="dish-info">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div class="dish-name">健力宝 <span class="dish-icon">🥤</span></div>
+                            <div class="add-btn">+</div>
+                        </div>
+                        <div class="dish-desc">橙味运动饮料，清爽解渴</div>
+                    </div>
+                </div>
+                <div class="dish-item">
+                    <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=delicious%20coconut%20milk%20drink%20in%20glass&image_size=square" alt="椰汁" class="dish-image">
+                    <div class="dish-info">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div class="dish-name">椰汁 <span class="dish-icon">🥥</span></div>
+                            <div class="add-btn">+</div>
+                        </div>
+                        <div class="dish-desc">浓郁椰香，营养丰富</div>
+                    </div>
+                </div>
+                <div class="dish-item">
+                    <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=delicious%20grape%20juice%20drink%20in%20glass&image_size=square" alt="葡萄汁" class="dish-image">
+                    <div class="dish-info">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div class="dish-name">葡萄汁 <span class="dish-icon">🍇</span></div>
+                            <div class="add-btn">+</div>
+                        </div>
+                        <div class="dish-desc">新鲜葡萄榨取，酸甜可口</div>
+                    </div>
+                </div>
+                <div class="dish-item">
+                    <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=delicious%20chinese%20fresh%20orange%20juice%20in%20glass&image_size=square" alt="橙汁" class="dish-image">
+                    <div class="dish-info">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div class="dish-name">橙汁 <span class="dish-icon">🍊</span></div>
+                            <div class="add-btn">+</div>
+                        </div>
+                        <div class="dish-desc">新鲜榨取，维生素丰富</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 购物车 -->
+    <div class="cart">
+        <div class="cart-info">
+            <div class="cart-icon">
+                <i>🛒</i>
+                <div class="cart-count">0</div>
+            </div>
+            <div class="cart-text">购物车</div>
+        </div>
+        <div class="checkout-btn">点好了</div>
+    </div>
+
+    <!-- 购物车详情 -->
+    <div class="cart-detail">
+        <div class="cart-detail-header">
+            <div class="cart-detail-title">已选菜品</div>
+            <div class="cart-detail-close">×</div>
+        </div>
+        <div class="cart-detail-list">
+            <!-- 购物车商品将通过JavaScript动态添加 -->
+        </div>
+        <div class="cart-detail-footer">
+            <div class="cart-detail-total">已选菜品：</div>
+            <div class="cart-detail-total-price">0</div>
+        </div>
+    </div>
+
+    <script>
+        // 分类切换
+        const categoryItems = document.querySelectorAll('.category-item');
+        const menuSections = {
+            'hot-dishes': document.getElementById('hot-dishes'),
+            'cold-dishes': document.getElementById('cold-dishes'),
+            'soup': document.getElementById('soup'),
+            'drinks': document.getElementById('drinks')
+        };
+
+        categoryItems.forEach((item, index) => {
+            item.addEventListener('click', () => {
+                // 更新分类选中状态
+                categoryItems.forEach(i => i.classList.remove('active'));
+                item.classList.add('active');
+
+                // 显示对应分类的菜品
+                Object.values(menuSections).forEach(section => {
+                    section.style.display = 'none';
+                });
+
+                if (index === 0) {
+                    menuSections['hot-dishes'].style.display = 'block';
+                } else if (index === 1) {
+                    menuSections['cold-dishes'].style.display = 'block';
+                } else if (index === 2) {
+                    menuSections['soup'].style.display = 'block';
+                } else if (index === 3) {
+                    menuSections['drinks'].style.display = 'block';
+                }
+            });
+        });
+
+        // 购物车功能
+        let cartItems = [];
+        let cartCount = 0;
+        const cartCountElement = document.querySelector('.cart-count');
+        const addButtons = document.querySelectorAll('.add-btn');
+        const cartInfo = document.querySelector('.cart-info');
+        const cartDetail = document.querySelector('.cart-detail');
+        const cartDetailClose = document.querySelector('.cart-detail-close');
+        const cartDetailList = document.querySelector('.cart-detail-list');
+        const cartDetailTotalPrice = document.querySelector('.cart-detail-total-price');
+        const checkoutBtn = document.querySelector('.checkout-btn');
+
+        // 添加商品到购物车
+        addButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                // 检查是否已经添加过
+                if (btn.classList.contains('added')) {
+                    return;
+                }
+
+                const dishItem = btn.closest('.dish-item');
+                const nameElement = dishItem.querySelector('.dish-name');
+                const dishName = nameElement.textContent;
+                const dishIcon = dishItem.querySelector('.dish-icon').textContent;
+
+                // 添加到购物车
+                cartItems.push({
+                    name: dishName,
+                    quantity: 1
+                });
+
+                // 更新购物车数量
+                cartCount++;
+                cartCountElement.textContent = cartCount;
+
+                // 更新购物车详情
+                updateCartDetail();
+
+                // 添加动画效果
+                btn.style.transform = 'scale(1.2)';
+                setTimeout(() => {
+                    btn.style.transform = 'scale(1)';
+                }, 200);
+
+                // 图标掉入购物车动画
+                createAddToCartAnimation(btn, dishIcon);
+
+                // 标记为已添加，并移除添加按钮
+                btn.classList.add('added');
+                setTimeout(() => {
+                    btn.remove();
+                }, 800);
+            });
+        });
+
+        // 创建添加到购物车的动画
+        function createAddToCartAnimation(btn, icon) {
+            // 创建动画元素
+            const animationElement = document.createElement('div');
+            animationElement.style.position = 'fixed';
+            animationElement.style.pointerEvents = 'none';
+            animationElement.style.zIndex = '9999';
+            animationElement.style.fontSize = '20px';
+            animationElement.textContent = icon;
+            
+            // 获取按钮位置
+            const btnRect = btn.getBoundingClientRect();
+            animationElement.style.left = `${btnRect.left + btnRect.width / 2}px`;
+            animationElement.style.top = `${btnRect.top + btnRect.height / 2}px`;
+            animationElement.style.transform = 'translate(-50%, -50%)';
+            
+            // 添加到页面
+            document.body.appendChild(animationElement);
+            
+            // 获取购物车位置
+            const cartIcon = document.querySelector('.cart-icon');
+            const cartRect = cartIcon.getBoundingClientRect();
+            
+            // 动画效果
+            animationElement.style.transition = 'all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+            
+            // 触发重排
+            void animationElement.offsetWidth;
+            
+            // 移动到购物车
+            animationElement.style.left = `${cartRect.left + cartRect.width / 2}px`;
+            animationElement.style.top = `${cartRect.top + cartRect.height / 2}px`;
+            animationElement.style.opacity = '0';
+            animationElement.style.transform = 'translate(-50%, -50%) scale(0.5)';
+            
+            // 动画结束后移除元素
+            setTimeout(() => {
+                document.body.removeChild(animationElement);
+                
+                // 购物车图标动画
+                cartIcon.style.transform = 'scale(1.2)';
+                setTimeout(() => {
+                    cartIcon.style.transform = 'scale(1)';
+                }, 200);
+            }, 800);
+        }
+
+        // 更新购物车详情
+        function updateCartDetail() {
+            cartDetailList.innerHTML = '';
+            
+            cartItems.forEach((item, index) => {
+                const cartItemElement = document.createElement('div');
+                cartItemElement.className = 'cart-item';
+                cartItemElement.innerHTML = `
+                    <div class="cart-item-name">${item.name}</div>
+                    <div class="delete-btn" data-index="${index}">×</div>
+                `;
+                cartDetailList.appendChild(cartItemElement);
+            });
+
+            // 更新总价
+            cartDetailTotalPrice.textContent = cartItems.length;
+
+            // 添加删除按钮事件
+            document.querySelectorAll('.delete-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const index = parseInt(btn.getAttribute('data-index'));
+                    deleteCartItem(index);
+                });
+            });
+        }
+
+        // 删除购物车商品
+        function deleteCartItem(index) {
+            const deletedItem = cartItems[index];
+            cartItems.splice(index, 1);
+            cartCount--;
+            cartCountElement.textContent = cartCount;
+            updateCartDetail();
+
+            // 恢复添加按钮
+            const dishName = deletedItem.name;
+            // 遍历所有菜品项
+            const dishItems = document.querySelectorAll('.dish-item');
+            dishItems.forEach(dishItem => {
+                const currentDishName = dishItem.querySelector('.dish-name').textContent;
+                // 检查菜品名称是否匹配（去除图标部分）
+                const pureDishName = currentDishName.trim().split(' ')[0];
+                const deletedPureName = dishName.trim().split(' ')[0];
+                
+                if (pureDishName === deletedPureName) {
+                    // 检查是否已经有添加按钮
+                    if (!dishItem.querySelector('.add-btn')) {
+                        const dishInfo = dishItem.querySelector('.dish-info');
+                        const dishNameDiv = dishInfo.querySelector('div:first-child');
+                        
+                        // 确保dishNameDiv是flex容器
+                        dishNameDiv.style.display = 'flex';
+                        dishNameDiv.style.justifyContent = 'space-between';
+                        dishNameDiv.style.alignItems = 'center';
+                        
+                        // 创建新的添加按钮
+                        const newAddBtn = document.createElement('div');
+                        newAddBtn.className = 'add-btn';
+                        newAddBtn.textContent = '+';
+                        newAddBtn.addEventListener('click', () => {
+                            // 检查是否已经添加过
+                            if (newAddBtn.classList.contains('added')) {
+                                return;
+                            }
+
+                            const dishIcon = dishItem.querySelector('.dish-icon').textContent;
+                            const actualDishName = currentDishName;
+
+                            // 添加到购物车
+                            cartItems.push({
+                                name: actualDishName,
+                                quantity: 1
+                            });
+
+                            // 更新购物车数量
+                            cartCount++;
+                            cartCountElement.textContent = cartCount;
+
+                            // 更新购物车详情
+                            updateCartDetail();
+
+                            // 添加动画效果
+                            newAddBtn.style.transform = 'scale(1.2)';
+                            setTimeout(() => {
+                                newAddBtn.style.transform = 'scale(1)';
+                            }, 200);
+
+                            // 图标掉入购物车动画
+                            createAddToCartAnimation(newAddBtn, dishIcon);
+
+                            // 标记为已添加，并移除添加按钮
+                            newAddBtn.classList.add('added');
+                            setTimeout(() => {
+                                newAddBtn.remove();
+                            }, 800);
+                        });
+                        dishNameDiv.appendChild(newAddBtn);
+                    }
+                }
+            });
+        }
+
+        // 切换购物车详情
+        cartInfo.addEventListener('click', () => {
+            cartDetail.classList.toggle('show');
+        });
+
+        // 关闭购物车详情
+        cartDetailClose.addEventListener('click', () => {
+            cartDetail.classList.remove('show');
+        });
+
+        // 点击空白处关闭购物车详情
+        document.addEventListener('click', (e) => {
+            if (!cartInfo.contains(e.target) && !cartDetail.contains(e.target)) {
+                cartDetail.classList.remove('show');
+            }
+        });
+
+        // 点好了按钮点击事件
+        checkoutBtn.addEventListener('click', () => {
+            if (cartItems.length === 0) {
+                alert('请先选择菜品');
+                return;
+            }
+            alert('订单已提交，感谢您的购买！');
+        });
+    </script>
+</body>
+</html>
